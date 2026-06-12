@@ -73,4 +73,27 @@ tssetup spa-demo -Mode router -Title "マイSPAサイト" -Code
 ```
 このモードでは、ライブラリ無しの状態で「Home」「About」「Setting」のページ切り替え機能が最初から動作します。
 
+---
+
+## ✉️ 問い合わせ先
+
+質問やフィードバック、バグ報告等は以下までご連絡ください。
+*   **X (旧Twitter):** [@Lapius7](https://x.com/Lapius7)
+*   **GitHub Issues:** [Lapius7/tssetup/issues](https://github.com/Lapius7/tssetup/issues)
+
+---
+
+## ⚠️ 免責事項
+
+本ソフトウェア（スクリプト）の使用によって生じた、直接的・間接的な損害（データ消失、業務中断、PCの不具合等）について、作者は一切の責任を負いません。自己責任のもとでご使用ください。
+
+---
+
+## 📄 ライセンス & コピーライト
+
+本プロジェクトは [MIT License](https://opensource.org/licenses/MIT) のもとで公開されています。
+
+Copyright (c) 2026 Lapius7
+
+
 

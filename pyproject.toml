@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tssetup"
+version = "1.0.2"
+description = "Bun + TypeScript フロントエンド環境を1コマンドで構築するツール"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Lapius7", email = "me@lapius7.com" }]
+keywords = ["bun", "typescript", "frontend", "scaffold", "cli", "hot-reload"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Software Development :: Build Tools",
+]
+
+[project.scripts]
+tssetup = "tssetup.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/Lapius7/tssetup"
+Issues   = "https://github.com/Lapius7/tssetup/issues"

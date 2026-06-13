@@ -253,7 +253,7 @@ Invoke-Expression $functionCode
 Write-Host "✨ tssetup コマンドのインストール/更新が完了しました！" -ForegroundColor Green
 Write-Host ""
 Write-Host "📦 インストールコマンド（再インストール・更新時）:" -ForegroundColor Cyan
-Write-Host "  powershell -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+Write-Host "  irm https://raw.githubusercontent.com/Lapius7/tssetup/main/install.ps1 | iex"
 Write-Host ""
 Write-Host "📋 使い方:" -ForegroundColor Cyan
 Write-Host "  tssetup myapp                         " -NoNewline; Write-Host "# 標準テンプレートで作成" -ForegroundColor DarkGray

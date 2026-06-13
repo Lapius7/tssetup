@@ -123,6 +123,9 @@ T: dict = {
         "updating":    "🔄 tssetup を最新バージョンに更新中...",
         "up_done":     "✓ 更新完了",
         "already_up":  "✓ 既に最新です (v{})",
+        "auto_upd":    "↑ v{} が利用可能 — 自動更新中...",
+        "auto_upd_ok": "✓ v{} に更新しました — 再起動します",
+        "auto_upd_ng": "✗ 自動更新に失敗しました — pip install --upgrade tssetup",
         "s_dirs":      "📂 src/  📁 dist/",
         "s_pkg":       "📦 package.json",
         "s_tsconfig":  "🔧 tsconfig.json",
@@ -179,6 +182,9 @@ T: dict = {
         "updating":    "🔄 Updating tssetup to the latest version...",
         "up_done":     "✓ Update complete",
         "already_up":  "✓ Already up to date (v{})",
+        "auto_upd":    "↑ v{} available — auto-updating...",
+        "auto_upd_ok": "✓ Updated to v{} — restarting",
+        "auto_upd_ng": "✗ Auto-update failed — pip install --upgrade tssetup",
         "s_dirs":      "📂 src/  📁 dist/",
         "s_pkg":       "📦 package.json",
         "s_tsconfig":  "🔧 tsconfig.json",
@@ -474,14 +480,42 @@ def create_project(name: str, mode: str, title: str, code: bool, open_dir: bool,
 
 # ── Self-update ────────────────────────────────────────────────────
 
+def _do_pip_upgrade(pkg: str) -> bool:
+    result = subprocess.run(
+        [sys.executable, "-m", "pip", "install", "--upgrade", pkg],
+        capture_output=True
+    )
+    return result.returncode == 0
+
+
+def _relaunch():
+    exe = shutil.which("tssetup") or sys.argv[0]
+    os.execv(exe, [exe] + sys.argv[1:])
+
+
+def auto_update(remote: str, lang: str):
+    s = T[lang]
+    print()
+    print(c("  " + s["auto_upd"].format(remote), YEL))
+    if _do_pip_upgrade("tssetup"):
+        print(c("  " + s["auto_upd_ok"].format(remote), GREEN))
+        _relaunch()
+    else:
+        print(c("  " + s["auto_upd_ng"], RED))
+        print()
+
+
 def do_update(remote: Optional[str], lang: str):
     s = T[lang]
     if remote and remote == __version__:
         print(c(s["already_up"].format(__version__), GREEN))
         return
     print(c(s["updating"], CYAN))
-    subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "tssetup"])
-    print(c(s["up_done"], GREEN))
+    if _do_pip_upgrade("tssetup"):
+        print(c(s["up_done"], GREEN))
+        _relaunch()
+    else:
+        print(c(s["auto_upd_ng"], RED))
 
 
 # ── Entry point ────────────────────────────────────────────────────
@@ -510,13 +544,12 @@ def main():
 
     remote = fetch_remote_version()
 
-    if remote and _is_newer(remote):
-        print()
-        print(c(T[lang]["update"].format(remote), YEL))
-
     if args.update:
         do_update(remote, lang)
         return
+
+    if remote and _is_newer(remote):
+        auto_update(remote, lang)
 
     if args.list:
         show_templates(lang)

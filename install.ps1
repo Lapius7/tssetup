@@ -256,6 +256,8 @@ Write-Host "📦 インストールコマンド（再インストール・更新
 Write-Host "  irm https://raw.githubusercontent.com/Lapius7/tssetup/main/install.ps1 | iex"
 Write-Host ""
 Write-Host "📋 使い方:" -ForegroundColor Cyan
+Write-Host "  tssetup <プロジェクト名> [-Mode <モード>] [-Title <タイトル>] [-Code]"
+Write-Host ""
 Write-Host "  tssetup myapp                         " -NoNewline; Write-Host "# 標準テンプレートで作成" -ForegroundColor DarkGray
 Write-Host "  tssetup myapp -Mode tailwind          " -NoNewline; Write-Host "# Tailwind CSS 組み込み" -ForegroundColor DarkGray
 Write-Host "  tssetup myapp -Mode router            " -NoNewline; Write-Host "# 自作SPA ルーター構成" -ForegroundColor DarkGray

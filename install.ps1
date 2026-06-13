@@ -15,6 +15,13 @@ function tssetup {
     )
 
     if ($Uninstall) {
+        Write-Host ""
+        Write-Host "⚠ tssetup をアンインストールします。本当によろしいですか？ (y/N): " -NoNewline -ForegroundColor Yellow
+        $confirm = Read-Host
+        if ($confirm -ne "y" -and $confirm -ne "Y") {
+            Write-Host "キャンセルしました。" -ForegroundColor DarkGray
+            return
+        }
         $profileContent = Get-Content $PROFILE -Raw -ErrorAction SilentlyContinue
         if ($profileContent -match "# <<BEGIN:tssetup>>") {
             $profileContent = $profileContent -replace "(?s)`n?# <<BEGIN:tssetup>>.*?# <<END:tssetup>>", ""

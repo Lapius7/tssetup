@@ -1,4 +1,5 @@
 import itertools
+import json
 import locale
 import os
 import re
@@ -257,9 +258,9 @@ def validate_name(name: str, lang: str) -> Optional[str]:
 
 def fetch_remote_version() -> Optional[str]:
     try:
-        url = "https://raw.githubusercontent.com/Lapius7/tssetup/main/version.txt"
+        url = "https://pypi.org/pypi/tssetup/json"
         with urllib.request.urlopen(url, timeout=3) as r:
-            return r.read().decode().strip()
+            return json.loads(r.read())["info"]["version"]
     except Exception:
         return None
 

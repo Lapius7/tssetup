@@ -102,10 +102,17 @@ function tssetup {
     
     New-Item -ItemType Directory -Path "$ProjectName/src" -Force > $null
     Set-Location $ProjectName
-    Write-Host "📂 カレントディレクトリを移動しました: $(Get-Location)" -ForegroundColor DarkGray
+
+    Write-Host ""
+    Write-Host "🔨 " -NoNewline -ForegroundColor Cyan
+    Write-Host $ProjectName -NoNewline -ForegroundColor White
+    Write-Host " を構築中..." -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  📁 src/ フォルダを作成しました" -ForegroundColor DarkGray
 
     bun init -y > $null
     if (Test-Path "index.ts") { Remove-Item "index.ts" -Force }
+    Write-Host "  📦 package.json" -NoNewline; Write-Host "   (bun init)" -ForegroundColor DarkGray
 
     $tsconfig = '{
   "compilerOptions": {
@@ -122,6 +129,7 @@ function tssetup {
   "include": ["src"]
 }'
 [System.IO.File]::WriteAllText((Join-Path (Get-Location) "tsconfig.json"), $tsconfig, [System.Text.UTF8Encoding]::new($false))
+    Write-Host "  ✅ tsconfig.json" -ForegroundColor Green
 
 $serverTs = 'import { watch } from "fs";
 const DEFAULT_PORT = 53000;
@@ -177,8 +185,9 @@ Bun.serve({
 console.log(`🌍 Bun Live Server running at http://localhost:${PORT}`);
 '
 [System.IO.File]::WriteAllText((Join-Path (Get-Location) "server.ts"), $serverTs, [System.Text.UTF8Encoding]::new($false))
+    Write-Host "  ✅ server.ts" -ForegroundColor Green
 
-$cdn = "<link rel=""stylesheet"" href=""https://cdn.jsdelivr.net/npm/destyle.css@3.0.2/destyle.min.css"">"
+$cdn ="<link rel=""stylesheet"" href=""https://cdn.jsdelivr.net/npm/destyle.css@3.0.2/destyle.min.css"">"
 $styles = "  <style>`n    body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #0f172a; color: #f8fafc; display: grid; place-items: center; min-height: 100vh; margin: 0; }`n    #app { text-align: center; }`n    h1 { font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }`n    p { color: #94a3b8; font-size: 1.1rem; }`n    code { background-color: #1e293b; padding: 0.2rem 0.4rem; border-radius: 0.25rem; color: #f43f5e; font-family: monospace; }`n  </style>"
 $bodyClass = ""
 $bodyHtml = "  <div id=""app""></div>"
@@ -267,11 +276,34 @@ switch ($Mode) {
 
 $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 [System.IO.File]::WriteAllText((Join-Path (Get-Location) "src/index.ts"), ($tsLines -join "`n"), $utf8NoBom)
-$html = "<!DOCTYPE html>`n<html lang=""ja"">`n<head>`n  <meta charset=""UTF-8"">`n  <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">`n  <title>$Title</title>`n  $cdn`n$styles`n</head>`n<body$bodyClass>`n$bodyHtml`n  <script type=""module"" src=""./dist/index.js""></script>`n  <script>`n    const ws = new WebSocket('ws://' + location.host + '/ws');`n    ws.onmessage = (e) => { if(e.data === 'reload') location.reload(); };`n  </script>`n</body>`n</html>"
+    Write-Host "  ✅ src/index.ts" -ForegroundColor Green
+$html ="<!DOCTYPE html>`n<html lang=""ja"">`n<head>`n  <meta charset=""UTF-8"">`n  <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">`n  <title>$Title</title>`n  $cdn`n$styles`n</head>`n<body$bodyClass>`n$bodyHtml`n  <script type=""module"" src=""./dist/index.js""></script>`n  <script>`n    const ws = new WebSocket('ws://' + location.host + '/ws');`n    ws.onmessage = (e) => { if(e.data === 'reload') location.reload(); };`n  </script>`n</body>`n</html>"
 [System.IO.File]::WriteAllText((Join-Path (Get-Location) "index.html"), $html, $utf8NoBom)
+    Write-Host "  ✅ index.html" -ForegroundColor Green
 
-Write-Host "✨ TypeScript環境の構築が完了しました！ [$ProjectName]" -ForegroundColor Green
-if ($Code -and (Get-Command code -ErrorAction SilentlyContinue)) { code . }
+    Write-Host ""
+    Write-Host "  ──────────────────────────────────────────" -ForegroundColor DarkGray
+    Write-Host "  ✨ " -NoNewline
+    Write-Host $ProjectName -NoNewline -ForegroundColor Cyan
+    Write-Host "  セットアップ完了！" -ForegroundColor Green
+    Write-Host "  ──────────────────────────────────────────" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  📁 $ProjectName/" -ForegroundColor Yellow
+    Write-Host "  ├── src/"
+    Write-Host "  │   └── index.ts"
+    Write-Host "  ├── dist/               " -NoNewline; Write-Host "← tsc が自動生成" -ForegroundColor DarkGray
+    Write-Host "  ├── index.html"
+    Write-Host "  ├── server.ts"
+    Write-Host "  ├── tsconfig.json"
+    Write-Host "  └── package.json"
+    Write-Host ""
+    Write-Host "  📂 $(Get-Location)" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  🚀 次のステップ:" -ForegroundColor Cyan
+    Write-Host "     tsbuild" -NoNewline -ForegroundColor White
+    Write-Host "    開発サーバーを起動" -ForegroundColor DarkGray
+    Write-Host ""
+    if ($Code -and (Get-Command code -ErrorAction SilentlyContinue)) { code . }
 }
 '@
 

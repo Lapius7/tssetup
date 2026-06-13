@@ -14,6 +14,20 @@ PowerShellから1コマンドで、Bun + TypeScript の高速なフロントエ�
 
 ---
 
+## 🛠️ インストール方法
+
+PowerShellで以下のコマンドを実行するだけで、お使いの環境（`$PROFILE`）に `tssetup` コマンドがインストールされます。
+
+```powershell
+irm https://raw.githubusercontent.com/Lapius7/tssetup/main/install.ps1 | iex
+```
+
+> [!NOTE]
+>
+> - インストール完了後、現在のPowerShellセッションに反映するには `. $PROFILE` を実行するか、新しくPowerShellを開き直してください。
+
+---
+
 ## ⚙️ 動作に必要な環境（依存関係）
 
 このコマンドを動かすには、システムに以下のツールがあらかじめインストールされている必要があります。
@@ -72,6 +86,24 @@ tssetup empty-app -Mode empty -Title "最小のデモアプリ"
 tssetup spa-demo -Mode router -Title "マイSPAサイト" -Code
 ```
 このモードでは、ライブラリ無しの状態で「Home」「About」「Setting」のページ切り替え機能が最初から動作します。
+
+---
+
+## 📁 作成されるファイル構成
+
+`tssetup myapp` を実行すると、以下の構成でプロジェクトフォルダが生成されます。
+
+```
+myapp/
+├── src/
+│   └── index.ts        ← エントリポイント（-Mode オプションで内容が変わる）
+├── dist/               ← コンパイル後のJS（tsc が自動生成）
+├── node_modules/       ← bun install が自動生成
+├── index.html          ← フロントエンドのHTML
+├── server.ts           ← ホットリロード対応の開発用Webサーバー
+├── tsconfig.json       ← TypeScript コンパイラ設定
+└── package.json        ← Bun プロジェクト設定
+```
 
 ---
 

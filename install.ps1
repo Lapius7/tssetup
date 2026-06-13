@@ -27,6 +27,16 @@ function tssetup {
         Write-Host "  -Title           : HTMLの <title> タグに設定する文字列"
         Write-Host "  -Code            : セットアップ完了後、新しいVS Codeのウィンドウで開く"
         Write-Host "  -Help            : このヘルプを表示します"
+        Write-Host "`n📁 作成されるファイル構成:" -ForegroundColor Yellow
+        Write-Host "  <プロジェクト名>/"
+        Write-Host "  ├── src/"
+        Write-Host "  │   └── index.ts        " -NoNewline; Write-Host "← エントリポイント（モード別で内容が異なる）" -ForegroundColor DarkGray
+        Write-Host "  ├── dist/               " -NoNewline; Write-Host "← コンパイル後JS（tsc が自動生成）" -ForegroundColor DarkGray
+        Write-Host "  ├── node_modules/       " -NoNewline; Write-Host "← bun install が自動生成" -ForegroundColor DarkGray
+        Write-Host "  ├── index.html          " -NoNewline; Write-Host "← フロントエンドHTML" -ForegroundColor DarkGray
+        Write-Host "  ├── server.ts           " -NoNewline; Write-Host "← 開発サーバー（ホットリロード対応）" -ForegroundColor DarkGray
+        Write-Host "  ├── tsconfig.json       " -NoNewline; Write-Host "← TypeScript設定" -ForegroundColor DarkGray
+        Write-Host "  └── package.json        " -NoNewline; Write-Host "← Bunプロジェクト設定" -ForegroundColor DarkGray
         Write-Host "==================================================`n" -ForegroundColor DarkGray
         return
     }
@@ -37,8 +47,7 @@ function tssetup {
     bun init -y > $null
     if (Test-Path "index.ts") { Remove-Item "index.ts" -Force }
 
-    $tsconfig = @'
-{
+    $tsconfig = '{
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
@@ -51,17 +60,15 @@ function tssetup {
     "isolatedModules": true
   },
   "include": ["src"]
-}
-'@
+}'
 $tsconfig | Out-File -FilePath tsconfig.json -Encoding utf8
 
-$serverTs = @'
-import { watch } from "fs";
+$serverTs = 'import { watch } from "fs";
 const DEFAULT_PORT = 53000;
 
-async function findAvailablePort(startPort) {
+async function findAvailablePort(startPort: number): Promise<number> {
   let port = startPort;
-  while (port < 65535) {
+  while (port <= 65535) {
     try {
       const server = Bun.serve({ port, fetch() { return new Response(); } });
       server.stop();
@@ -108,7 +115,7 @@ Bun.serve({
   }
 });
 console.log(`🌍 Bun Live Server running at http://localhost:${PORT}`);
-'@
+'
 $serverTs | Out-File -FilePath server.ts -Encoding utf8
 
 $cdn = "<link rel=""stylesheet"" href=""https://cdn.jsdelivr.net/npm/destyle.css@3.0.2/destyle.min.css"">"
@@ -214,17 +221,45 @@ if (!(Test-Path $PROFILE)) {
 $profileContent = Get-Content $PROFILE -Raw -ErrorAction SilentlyContinue
 if ([string]::IsNullOrEmpty($profileContent)) { $profileContent = "" }
 
-$pattern = "(?s)function\s+$functionName\s*\{.*?\n\}"
-if ($profileContent -match $pattern) {
-    $profileContent = $profileContent -replace $pattern, ""
+$beginMarker = "# <<BEGIN:$functionName>>"
+$endMarker = "# <<END:$functionName>>"
+$markerPattern = "(?s)# <<BEGIN:$functionName>>.*?# <<END:$functionName>>"
+$oldPattern = "(?s)function\s+$functionName\s*\{.*?\r?\n\}"
+
+if ($profileContent -match $markerPattern) {
+    $profileContent = $profileContent -replace $markerPattern, ""
+} elseif ($profileContent -match $oldPattern) {
+    $profileContent = $profileContent -replace $oldPattern, ""
 }
 
-
-$newProfileContent = $profileContent.Trim() + "`n`n" + $functionCode
+$block = "$beginMarker`n$functionCode`n$endMarker"
+$newProfileContent = $profileContent.Trim() + "`n`n" + $block
 $newProfileContent.Trim() | Out-File -FilePath $PROFILE -Encoding utf8 -Force
 
 # 即時反映のためにメモリ上の関数も更新する
 Invoke-Expression $functionCode
 
 Write-Host "✨ tssetup コマンドのインストール/更新が完了しました！" -ForegroundColor Green
+Write-Host ""
+Write-Host "📦 インストールコマンド（再インストール・更新時）:" -ForegroundColor Cyan
+Write-Host "  powershell -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+Write-Host ""
+Write-Host "📋 使い方:" -ForegroundColor Cyan
+Write-Host "  tssetup myapp                         " -NoNewline; Write-Host "# 標準テンプレートで作成" -ForegroundColor DarkGray
+Write-Host "  tssetup myapp -Mode tailwind          " -NoNewline; Write-Host "# Tailwind CSS 組み込み" -ForegroundColor DarkGray
+Write-Host "  tssetup myapp -Mode router            " -NoNewline; Write-Host "# 自作SPA ルーター構成" -ForegroundColor DarkGray
+Write-Host "  tssetup myapp -Mode empty             " -NoNewline; Write-Host "# 最小構成" -ForegroundColor DarkGray
+Write-Host "  tssetup myapp -Title ""My App"" -Code  " -NoNewline; Write-Host "# タイトル指定 + VS Code 起動" -ForegroundColor DarkGray
+Write-Host ""
+Write-Host "📁 作成されるファイル構成:" -ForegroundColor Cyan
+Write-Host "  <プロジェクト名>/"
+Write-Host "  ├── src/"
+Write-Host "  │   └── index.ts        " -NoNewline; Write-Host "← エントリポイント（モード別で内容が異なる）" -ForegroundColor DarkGray
+Write-Host "  ├── dist/               " -NoNewline; Write-Host "← コンパイル後JS（tsc が自動生成）" -ForegroundColor DarkGray
+Write-Host "  ├── node_modules/       " -NoNewline; Write-Host "← bun install が自動生成" -ForegroundColor DarkGray
+Write-Host "  ├── index.html          " -NoNewline; Write-Host "← フロントエンドHTML" -ForegroundColor DarkGray
+Write-Host "  ├── server.ts           " -NoNewline; Write-Host "← 開発サーバー（ホットリロード対応）" -ForegroundColor DarkGray
+Write-Host "  ├── tsconfig.json       " -NoNewline; Write-Host "← TypeScript設定" -ForegroundColor DarkGray
+Write-Host "  └── package.json        " -NoNewline; Write-Host "← Bunプロジェクト設定" -ForegroundColor DarkGray
+Write-Host ""
 Write-Host "新しいPowerShellウィンドウを開くか、 '. `$PROFILE' を実行して即時反映させてください。" -ForegroundColor Yellow

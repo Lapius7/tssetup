@@ -10,8 +10,22 @@ function tssetup {
         [ValidateSet("default", "tailwind", "router", "empty")]
         [string]$Mode = "default",
         [Parameter(Mandatory = $false)][switch]$Help,
-        [Parameter(Mandatory = $false)][switch]$Code
+        [Parameter(Mandatory = $false)][switch]$Code,
+        [Parameter(Mandatory = $false)][switch]$Uninstall
     )
+
+    if ($Uninstall) {
+        $profileContent = Get-Content $PROFILE -Raw -ErrorAction SilentlyContinue
+        if ($profileContent -match "# <<BEGIN:tssetup>>") {
+            $profileContent = $profileContent -replace "(?s)`n?# <<BEGIN:tssetup>>.*?# <<END:tssetup>>", ""
+            [System.IO.File]::WriteAllText($PROFILE, $profileContent.Trim(), [System.Text.UTF8Encoding]::new($true))
+            Remove-Item Function:tssetup -ErrorAction SilentlyContinue
+            Write-Host "✅ tssetup をアンインストールしました。" -ForegroundColor Green
+        } else {
+            Write-Host "⚠ tssetup はインストールされていません。" -ForegroundColor Yellow
+        }
+        return
+    }
 
     $localVersion = "1.0.1"
     $remoteVersion = $null

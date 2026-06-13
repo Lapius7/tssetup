@@ -9,8 +9,6 @@ from typing import Optional
 from . import __version__
 from .templates import TSCONFIG, SERVER_TS, INDEX_TS, get_html
 
-# --- Console setup (Windows: enable ANSI + force UTF-8) ---
-
 def _setup_console():
     if sys.platform == "win32":
         try:
@@ -25,7 +23,7 @@ def _setup_console():
 
 _setup_console()
 
-R = "\033[0m"
+R      = "\033[0m"
 CYAN   = "\033[36m"
 GREEN  = "\033[32m"
 YELLOW = "\033[33m"
@@ -33,9 +31,8 @@ WHITE  = "\033[97m"
 GRAY   = "\033[90m"
 
 def c(text, color): return f"{color}{text}{R}"
+def bar(): return c("  " + "─" * 44, GRAY)
 
-
-# --- Version check ---
 
 def fetch_remote_version() -> Optional[str]:
     try:
@@ -46,41 +43,45 @@ def fetch_remote_version() -> Optional[str]:
         return None
 
 
-# --- Info screen ---
-
 def show_info(remote: Optional[str]):
-    print()
-    print(c("🎨 tssetup", CYAN) + c(f"  v{__version__}", GRAY))
-    print("Bun + TypeScript フロントエンド環境を1コマンドで構築するツール")
-    print()
-    print(c("開発者  : ", YELLOW) + "Lapius7")
-    print(c("X       : ", YELLOW) + "https://x.com/Lapius7")
-    print(c("GitHub  : ", YELLOW) + "https://github.com/Lapius7/tssetup")
-    print()
     if remote is None:
-        print(f"バージョン  : {__version__}  " + c("(バージョン確認失敗)", GRAY))
+        status = c("(バージョン確認失敗)", GRAY)
     elif remote == __version__:
-        print(f"バージョン  : {__version__}  " + c("✅ 最新です", GREEN))
+        status = c("✓ 最新です", GREEN)
     else:
-        print(f"バージョン  : {__version__}  " + c(f"⬆ 最新: {remote}", YELLOW))
+        status = c(f"↑ v{remote} が利用可能", YELLOW)
+
     print()
-    print(c("使い方  : tssetup <プロジェクト名> [--mode <モード>]", GRAY))
-    print(c("ヘルプ  : tssetup --help", GRAY))
+    print(c("  tssetup", CYAN) + c(f" v{__version__}  ", GRAY) + status)
+    print(c("  Bun + TypeScript フロントエンド環境を1コマンドで構築", GRAY))
+    print()
+    print(c("  開発者  ", GRAY) + "Lapius7")
+    print(c("  X       ", GRAY) + "https://x.com/Lapius7")
+    print(c("  GitHub  ", GRAY) + "https://github.com/Lapius7/tssetup")
+    print()
+    print(c("  使い方  tssetup <プロジェクト名> [--mode <モード>]", GRAY))
+    print(c("  ヘルプ  tssetup --help", GRAY))
     print()
 
 
-# --- Project creation ---
+def _step(label: str, note: str = ""):
+    label_col = c(label.ljust(20), WHITE)
+    note_col  = c(note, GRAY) if note else ""
+    print(f"  {c('✓', GREEN)}  {label_col}{note_col}")
+
 
 def create_project(name: str, mode: str, title: str, code: bool):
     project_dir = Path(name)
 
     print()
-    print(c("🔨 ", CYAN) + c(name, WHITE) + c(" を構築中...", CYAN))
+    print(bar())
+    print(c("  🎨 tssetup  ", CYAN) + c(name, WHITE))
+    print(bar())
     print()
 
     (project_dir / "src").mkdir(parents=True, exist_ok=True)
     (project_dir / "dist").mkdir(parents=True, exist_ok=True)
-    print(c("  📁 src/ dist/ フォルダを作成しました", GRAY))
+    _step("src/  dist/")
 
     os.chdir(project_dir)
 
@@ -88,45 +89,41 @@ def create_project(name: str, mode: str, title: str, code: bool):
     stale = Path("index.ts")
     if stale.exists():
         stale.unlink()
-    print("  📦 package.json" + c("   (bun init)", GRAY))
+    _step("package.json", "bun init")
 
     Path("tsconfig.json").write_text(TSCONFIG, encoding="utf-8")
-    print(c("  ✅ tsconfig.json", GREEN))
+    _step("tsconfig.json")
 
     Path("server.ts").write_text(SERVER_TS, encoding="utf-8")
-    print(c("  ✅ server.ts", GREEN))
+    _step("server.ts", "ホットリロードサーバー")
 
     Path("src/index.ts").write_text(INDEX_TS[mode], encoding="utf-8")
-    print(c("  ✅ src/index.ts", GREEN))
+    _step("src/index.ts", f"mode: {mode}")
 
     Path("index.html").write_text(get_html(mode, title), encoding="utf-8")
-    print(c("  ✅ index.html", GREEN))
+    _step("index.html")
 
     print()
-    print(c("  ──────────────────────────────────────────", GRAY))
-    print("  ✨ " + c(name, CYAN) + c("  セットアップ完了！", GREEN))
-    print(c("  ──────────────────────────────────────────", GRAY))
+    print(bar())
+    print(c("  ✨ セットアップ完了！", GREEN))
+    print(bar())
     print()
-    print(c(f"  📁 {name}/", YELLOW))
-    print("  ├── src/")
-    print("  │   └── index.ts")
-    print("  ├── dist/               " + c("← tsc が自動生成", GRAY))
-    print("  ├── index.html")
-    print("  ├── server.ts")
-    print("  ├── tsconfig.json")
-    print("  └── package.json")
+    print(c(f"  {name}/", YELLOW))
+    print(f"  ├── {c('src/index.ts', WHITE)}")
+    print(f"  ├── {c('dist/', GRAY)}")
+    print(f"  ├── {c('index.html', WHITE)}")
+    print(f"  ├── {c('server.ts', WHITE)}")
+    print(f"  ├── {c('tsconfig.json', WHITE)}")
+    print(f"  └── {c('package.json', WHITE)}")
     print()
-    print(c(f"  📂 {Path.cwd()}", GRAY))
-    print()
-    print(c("  🚀 次のステップ:", CYAN))
-    print("     " + c("tsbuild", WHITE) + c("    開発サーバーを起動", GRAY))
+    print(c("  次のステップ:", CYAN))
+    print(f"    {c('cd ./' + name, WHITE)}")
+    print(f"    {c('tsbuild', WHITE)}")
     print()
 
     if code and shutil.which("code"):
         subprocess.run(["code", "."])
 
-
-# --- Entry point ---
 
 def main():
     parser = argparse.ArgumentParser(
@@ -134,19 +131,14 @@ def main():
         description="Bun + TypeScript フロントエンド環境を1コマンドで構築するツール",
         add_help=False,
     )
-    parser.add_argument("project_name", nargs="?", help="作成するプロジェクトのフォルダ名")
+    parser.add_argument("project_name", nargs="?")
     parser.add_argument("--mode", "-m",
                         choices=["default", "tailwind", "router", "empty"],
-                        default="default",
-                        help="テンプレートモード (default/tailwind/router/empty)")
-    parser.add_argument("--title", "-t", default="Bun + TS App",
-                        help="HTMLの <title> タグに埋め込む文字列")
-    parser.add_argument("--code", "-c", action="store_true",
-                        help="セットアップ完了後に VS Code で開く")
-    parser.add_argument("--version", "-v", action="store_true",
-                        help="バージョンを表示")
-    parser.add_argument("--help", "-h", action="store_true",
-                        help="ヘルプを表示")
+                        default="default")
+    parser.add_argument("--title", "-t", default="Bun + TS App")
+    parser.add_argument("--code", "-c", action="store_true")
+    parser.add_argument("--version", "-v", action="store_true")
+    parser.add_argument("--help", "-h", action="store_true")
 
     args = parser.parse_args()
 
@@ -158,12 +150,11 @@ def main():
 
     if remote and remote != __version__:
         print()
-        print(c(f"🔄 新しいバージョン ({remote}) があります。pip install --upgrade tssetup で更新できます。", YELLOW))
+        print(c(f"  ↑ 新バージョン v{remote} があります  pip install --upgrade tssetup", YELLOW))
 
     if args.help or not args.project_name:
-        if not args.project_name:
-            show_info(remote)
-        if args.help or not args.project_name:
+        show_info(remote)
+        if args.help:
             parser.print_help()
         return
 

@@ -280,7 +280,7 @@ if ($profileContent -match $markerPattern) {
 
 $block = "$beginMarker`n$functionCode`n$endMarker"
 $newProfileContent = $profileContent.Trim() + "`n`n" + $block
-[System.IO.File]::WriteAllText($PROFILE, $newProfileContent.Trim(), [System.Text.UTF8Encoding]::new($false))
+[System.IO.File]::WriteAllText($PROFILE, $newProfileContent.Trim(), [System.Text.UTF8Encoding]::new($true))
 
 # 即時反映のためにメモリ上の関数も更新する
 Invoke-Expression $functionCode

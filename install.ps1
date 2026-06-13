@@ -98,7 +98,7 @@ function tssetup {
   },
   "include": ["src"]
 }'
-$tsconfig | Out-File -FilePath tsconfig.json -Encoding utf8
+[System.IO.File]::WriteAllText((Join-Path (Get-Location) "tsconfig.json"), $tsconfig, [System.Text.UTF8Encoding]::new($false))
 
 $serverTs = 'import { watch } from "fs";
 const DEFAULT_PORT = 53000;
@@ -153,7 +153,7 @@ Bun.serve({
 });
 console.log(`🌍 Bun Live Server running at http://localhost:${PORT}`);
 '
-$serverTs | Out-File -FilePath server.ts -Encoding utf8
+[System.IO.File]::WriteAllText((Join-Path (Get-Location) "server.ts"), $serverTs, [System.Text.UTF8Encoding]::new($false))
 
 $cdn = "<link rel=""stylesheet"" href=""https://cdn.jsdelivr.net/npm/destyle.css@3.0.2/destyle.min.css"">"
 $styles = "  <style>`n    body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #0f172a; color: #f8fafc; display: grid; place-items: center; min-height: 100vh; margin: 0; }`n    #app { text-align: center; }`n    h1 { font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }`n    p { color: #94a3b8; font-size: 1.1rem; }`n    code { background-color: #1e293b; padding: 0.2rem 0.4rem; border-radius: 0.25rem; color: #f43f5e; font-family: monospace; }`n  </style>"
@@ -242,9 +242,10 @@ switch ($Mode) {
   }
 }
 
-$tsLines -join "`n" | Out-File -FilePath src/index.ts -Encoding utf8
+$utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+[System.IO.File]::WriteAllText((Join-Path (Get-Location) "src/index.ts"), ($tsLines -join "`n"), $utf8NoBom)
 $html = "<!DOCTYPE html>`n<html lang=""ja"">`n<head>`n  <meta charset=""UTF-8"">`n  <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">`n  <title>$Title</title>`n  $cdn`n$styles`n</head>`n<body$bodyClass>`n$bodyHtml`n  <script type=""module"" src=""./dist/index.js""></script>`n  <script>`n    const ws = new WebSocket('ws://' + location.host + '/ws');`n    ws.onmessage = (e) => { if(e.data === 'reload') location.reload(); };`n  </script>`n</body>`n</html>"
-$html | Out-File -FilePath index.html -Encoding utf8
+[System.IO.File]::WriteAllText((Join-Path (Get-Location) "index.html"), $html, $utf8NoBom)
 
 Write-Host "✨ TypeScript環境の構築が完了しました！ [$ProjectName]" -ForegroundColor Green
 if ($Code -and (Get-Command code -ErrorAction SilentlyContinue)) { code . }
@@ -279,7 +280,7 @@ if ($profileContent -match $markerPattern) {
 
 $block = "$beginMarker`n$functionCode`n$endMarker"
 $newProfileContent = $profileContent.Trim() + "`n`n" + $block
-$newProfileContent.Trim() | Out-File -FilePath $PROFILE -Encoding utf8 -Force
+[System.IO.File]::WriteAllText($PROFILE, $newProfileContent.Trim(), [System.Text.UTF8Encoding]::new($false))
 
 # 即時反映のためにメモリ上の関数も更新する
 Invoke-Expression $functionCode

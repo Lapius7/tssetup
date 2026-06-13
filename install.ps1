@@ -101,6 +101,7 @@ function tssetup {
     
     New-Item -ItemType Directory -Path "$ProjectName/src" -Force > $null
     Set-Location $ProjectName
+    Write-Host "📂 カレントディレクトリを移動しました: $(Get-Location)" -ForegroundColor DarkGray
 
     bun init -y > $null
     if (Test-Path "index.ts") { Remove-Item "index.ts" -Force }

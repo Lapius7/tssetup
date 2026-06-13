@@ -1,4 +1,4 @@
-import argparse
+import locale
 import os
 import sys
 import subprocess
@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Optional
 from . import __version__
 from .templates import TSCONFIG, SERVER_TS, INDEX_TS, get_html
+
 
 def _setup_console():
     if sys.platform == "win32":
@@ -31,8 +32,104 @@ WHITE  = "\033[97m"
 GRAY   = "\033[90m"
 
 def c(text, color): return f"{color}{text}{R}"
-def bar(): return c("  " + "─" * 44, GRAY)
+def bar():  return c("  " + "─" * 52, GRAY)
+def dbar(): return c("  " + "═" * 52, GRAY)
 
+
+# ── i18n ──────────────────────────────────────────────────────────
+
+def _detect_lang(override: Optional[str] = None) -> str:
+    if override in ("ja", "en"):
+        return override
+    env = os.environ.get("TSSETUP_LANG", "")
+    if env in ("ja", "en"):
+        return env
+    try:
+        loc = locale.getdefaultlocale()[0] or ""
+        return "ja" if loc.startswith("ja") else "en"
+    except Exception:
+        return "en"
+
+
+T: dict = {
+    "ja": {
+        "tagline":    "Bun + TypeScript フロントエンド環境を1コマンドで構築",
+        "author":     "開発者",
+        "ver_ok":     "✓ 最新です",
+        "ver_fail":   "(バージョン確認失敗)",
+        "ver_new":    "↑ v{} が利用可能",
+        "update":     "  ↑ 新バージョン v{} があります — pip install --upgrade tssetup",
+        "guide":      "使い方",
+        "help":       "ヘルプ",
+        "usage":      "使い方",
+        "usage_cmd":  "tssetup <プロジェクト名> [オプション]",
+        "args":       "引数",
+        "arg_name":   "作成するプロジェクトのフォルダ名",
+        "opts":       "オプション",
+        "o_mode":     "テンプレートモード",
+        "o_title":    "HTML の <title> タグのテキスト",
+        "o_code":     "完了後に VS Code で開く",
+        "o_lang":     "表示言語",
+        "o_ver":      "バージョンを表示",
+        "o_help":     "このヘルプを表示",
+        "templates":  "テンプレート",
+        "m_default":  "Destyle.css + ダークモード対応のシンプル構成",
+        "m_tailwind": "Tailwind CSS (CDN) 組み込み",
+        "m_router":   "HTML5 History API を使った軽量 SPA ルーター",
+        "m_empty":    "最小構成（空の TypeScript + シンプルな HTML）",
+        "examples":   "例",
+        "building":   "を構築中...",
+        "done":       "✨ セットアップ完了！",
+        "next":       "次のステップ",
+        "s_dirs":     "src/  dist/",
+        "s_pkg":      "package.json",
+        "s_tsconfig": "tsconfig.json",
+        "s_server":   "server.ts",
+        "s_server_n": "ホットリロードサーバー",
+        "s_ts":       "src/index.ts",
+        "s_html":     "index.html",
+    },
+    "en": {
+        "tagline":    "Scaffold a Bun + TypeScript frontend in one command",
+        "author":     "Author",
+        "ver_ok":     "✓ up to date",
+        "ver_fail":   "(version check failed)",
+        "ver_new":    "↑ v{} available",
+        "update":     "  ↑ New version v{} available — pip install --upgrade tssetup",
+        "guide":      "Guide",
+        "help":       "Help",
+        "usage":      "Usage",
+        "usage_cmd":  "tssetup <project-name> [options]",
+        "args":       "Arguments",
+        "arg_name":   "Name of the project folder to create",
+        "opts":       "Options",
+        "o_mode":     "Template mode",
+        "o_title":    "Text for the HTML <title> tag",
+        "o_code":     "Open in VS Code after setup",
+        "o_lang":     "Display language",
+        "o_ver":      "Show version",
+        "o_help":     "Show this help",
+        "templates":  "Templates",
+        "m_default":  "Destyle.css + dark mode ready simple layout",
+        "m_tailwind": "Tailwind CSS (CDN) included",
+        "m_router":   "Lightweight SPA with HTML5 History API routing",
+        "m_empty":    "Minimal setup (empty TypeScript + simple HTML)",
+        "examples":   "Examples",
+        "building":   " — building...",
+        "done":       "✨ Setup complete!",
+        "next":       "Next steps",
+        "s_dirs":     "src/  dist/",
+        "s_pkg":      "package.json",
+        "s_tsconfig": "tsconfig.json",
+        "s_server":   "server.ts",
+        "s_server_n": "hot-reload server",
+        "s_ts":       "src/index.ts",
+        "s_html":     "index.html",
+    },
+}
+
+
+# ── Version check ──────────────────────────────────────────────────
 
 def fetch_remote_version() -> Optional[str]:
     try:
@@ -43,45 +140,108 @@ def fetch_remote_version() -> Optional[str]:
         return None
 
 
-def show_info(remote: Optional[str]):
-    if remote is None:
-        status = c("(バージョン確認失敗)", GRAY)
-    elif remote == __version__:
-        status = c("✓ 最新です", GREEN)
-    else:
-        status = c(f"↑ v{remote} が利用可能", YELLOW)
+def _ver_badge(remote: Optional[str], lang: str) -> str:
+    s = T[lang]
+    if remote is None:   return c(s["ver_fail"], GRAY)
+    if remote == __version__: return c(s["ver_ok"], GREEN)
+    return c(s["ver_new"].format(remote), YELLOW)
+
+
+# ── Info screen ────────────────────────────────────────────────────
+
+def show_info(remote: Optional[str], lang: str):
+    s = T[lang]
+    print()
+    print(dbar())
+    print(c("  🎨  tssetup  ", CYAN) + c(f"v{__version__}", WHITE)
+          + "    " + _ver_badge(remote, lang))
+    print(dbar())
+    print(f"\n  {c(s['tagline'], GRAY)}\n")
+    W = 10
+    print(f"  {c((s['author']+' ').ljust(W), GRAY)}Lapius7")
+    print(f"  {c('X'.ljust(W), GRAY)}https://x.com/Lapius7")
+    print(f"  {c('GitHub'.ljust(W), GRAY)}https://github.com/Lapius7/tssetup")
+    print(f"  {c('PyPI'.ljust(W), GRAY)}https://pypi.org/project/tssetup")
+    print()
+    print(f"  {c((s['guide']+' ').ljust(W), GRAY)}{s['usage_cmd']}")
+    print(f"  {c((s['help']+' ').ljust(W), GRAY)}tssetup --help")
+    print()
+    print(dbar())
+    print()
+
+
+# ── Custom help ────────────────────────────────────────────────────
+
+def _opt(flags: str, desc: str, note: str = ""):
+    f = c(f"  {flags:<26}", CYAN)
+    d = c(desc, WHITE)
+    n = c(f"  ({note})", GRAY) if note else ""
+    print(f"{f}{d}{n}")
+
+def _section(title: str):
+    print(f"\n  {c(title, YELLOW)}")
+
+def show_help(lang: str):
+    s = T[lang]
+    print()
+    print(dbar())
+    print(c("  🎨  tssetup  ", CYAN) + c(f"v{__version__}", WHITE))
+    print(c(f"  {s['tagline']}", GRAY))
+    print(dbar())
+
+    _section(s["usage"])
+    print(f"    {c(s['usage_cmd'], WHITE)}")
+
+    _section(s["args"])
+    print(f"    {c('project_name'.ljust(18), CYAN)}{c(s['arg_name'], WHITE)}")
+
+    _section(s["opts"])
+    _opt("-m, --mode <mode>",   s["o_mode"],  "default")
+    _opt("-t, --title <text>",  s["o_title"], "Bun + TS App")
+    _opt("-c, --code",          s["o_code"])
+    _opt("    --lang <lang>",   s["o_lang"],  "ja / en")
+    _opt("-v, --version",       s["o_ver"])
+    _opt("-h, --help",          s["o_help"])
+
+    _section(s["templates"])
+    for key, tk in [("default","m_default"),("tailwind","m_tailwind"),
+                    ("router","m_router"),("empty","m_empty")]:
+        print(f"    {c(key.ljust(12), CYAN)}{c(s[tk], WHITE)}")
+
+    _section(s["examples"])
+    examples = [
+        "tssetup my-app",
+        "tssetup my-app --mode tailwind --code",
+        'tssetup my-app --mode router --title "My SPA"',
+        "tssetup my-app --mode empty --lang en",
+    ]
+    for ex in examples:
+        print(f"    {c(ex, WHITE)}")
 
     print()
-    print(c("  tssetup", CYAN) + c(f" v{__version__}  ", GRAY) + status)
-    print(c("  Bun + TypeScript フロントエンド環境を1コマンドで構築", GRAY))
-    print()
-    print(c("  開発者  ", GRAY) + "Lapius7")
-    print(c("  X       ", GRAY) + "https://x.com/Lapius7")
-    print(c("  GitHub  ", GRAY) + "https://github.com/Lapius7/tssetup")
-    print()
-    print(c("  使い方  tssetup <プロジェクト名> [--mode <モード>]", GRAY))
-    print(c("  ヘルプ  tssetup --help", GRAY))
+    print(dbar())
     print()
 
+
+# ── Project creation ───────────────────────────────────────────────
 
 def _step(label: str, note: str = ""):
-    label_col = c(label.ljust(20), WHITE)
-    note_col  = c(note, GRAY) if note else ""
-    print(f"  {c('✓', GREEN)}  {label_col}{note_col}")
+    print(f"  {c('✓', GREEN)}  {c(label.ljust(22), WHITE)}{c(note, GRAY)}")
 
 
-def create_project(name: str, mode: str, title: str, code: bool):
+def create_project(name: str, mode: str, title: str, code: bool, lang: str):
+    s = T[lang]
     project_dir = Path(name)
 
     print()
     print(bar())
-    print(c("  🎨 tssetup  ", CYAN) + c(name, WHITE))
+    print(c("  🎨 tssetup  ", CYAN) + c(name, WHITE) + c(s["building"], GRAY))
     print(bar())
     print()
 
     (project_dir / "src").mkdir(parents=True, exist_ok=True)
     (project_dir / "dist").mkdir(parents=True, exist_ok=True)
-    _step("src/  dist/")
+    _step(s["s_dirs"])
 
     os.chdir(project_dir)
 
@@ -89,23 +249,23 @@ def create_project(name: str, mode: str, title: str, code: bool):
     stale = Path("index.ts")
     if stale.exists():
         stale.unlink()
-    _step("package.json", "bun init")
+    _step(s["s_pkg"], "bun init")
 
     Path("tsconfig.json").write_text(TSCONFIG, encoding="utf-8")
-    _step("tsconfig.json")
+    _step(s["s_tsconfig"])
 
     Path("server.ts").write_text(SERVER_TS, encoding="utf-8")
-    _step("server.ts", "ホットリロードサーバー")
+    _step(s["s_server"], s["s_server_n"])
 
     Path("src/index.ts").write_text(INDEX_TS[mode], encoding="utf-8")
-    _step("src/index.ts", f"mode: {mode}")
+    _step(s["s_ts"], f"mode: {mode}")
 
     Path("index.html").write_text(get_html(mode, title), encoding="utf-8")
-    _step("index.html")
+    _step(s["s_html"])
 
     print()
     print(bar())
-    print(c("  ✨ セットアップ完了！", GREEN))
+    print(c(f"  {s['done']}", GREEN))
     print(bar())
     print()
     print(c(f"  {name}/", YELLOW))
@@ -116,7 +276,7 @@ def create_project(name: str, mode: str, title: str, code: bool):
     print(f"  ├── {c('tsconfig.json', WHITE)}")
     print(f"  └── {c('package.json', WHITE)}")
     print()
-    print(c("  次のステップ:", CYAN))
+    print(c(f"  {s['next']}:", CYAN))
     print(f"    {c('cd ./' + name, WHITE)}")
     print(f"    {c('tsbuild', WHITE)}")
     print()
@@ -125,22 +285,23 @@ def create_project(name: str, mode: str, title: str, code: bool):
         subprocess.run(["code", "."])
 
 
+# ── Entry point ────────────────────────────────────────────────────
+
 def main():
-    parser = argparse.ArgumentParser(
-        prog="tssetup",
-        description="Bun + TypeScript フロントエンド環境を1コマンドで構築するツール",
-        add_help=False,
-    )
+    import argparse
+    parser = argparse.ArgumentParser(prog="tssetup", add_help=False)
     parser.add_argument("project_name", nargs="?")
     parser.add_argument("--mode", "-m",
                         choices=["default", "tailwind", "router", "empty"],
                         default="default")
     parser.add_argument("--title", "-t", default="Bun + TS App")
     parser.add_argument("--code", "-c", action="store_true")
+    parser.add_argument("--lang", default=None)
     parser.add_argument("--version", "-v", action="store_true")
     parser.add_argument("--help", "-h", action="store_true")
 
     args = parser.parse_args()
+    lang = _detect_lang(args.lang)
 
     if args.version:
         print(f"tssetup v{__version__}")
@@ -150,15 +311,17 @@ def main():
 
     if remote and remote != __version__:
         print()
-        print(c(f"  ↑ 新バージョン v{remote} があります  pip install --upgrade tssetup", YELLOW))
+        print(c(T[lang]["update"].format(remote), YELLOW))
 
-    if args.help or not args.project_name:
-        show_info(remote)
-        if args.help:
-            parser.print_help()
+    if args.help:
+        show_help(lang)
         return
 
-    create_project(args.project_name, args.mode, args.title, args.code)
+    if not args.project_name:
+        show_info(remote, lang)
+        return
+
+    create_project(args.project_name, args.mode, args.title, args.code, lang)
 
 
 if __name__ == "__main__":

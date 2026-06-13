@@ -101,6 +101,7 @@ function tssetup {
     }
     
     New-Item -ItemType Directory -Path "$ProjectName/src" -Force > $null
+    New-Item -ItemType Directory -Path "$ProjectName/dist" -Force > $null
     Set-Location $ProjectName
 
     Write-Host ""
@@ -108,7 +109,7 @@ function tssetup {
     Write-Host $ProjectName -NoNewline -ForegroundColor White
     Write-Host " を構築中..." -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "  📁 src/ フォルダを作成しました" -ForegroundColor DarkGray
+    Write-Host "  📁 src/ dist/ フォルダを作成しました" -ForegroundColor DarkGray
 
     bun init -y > $null
     if (Test-Path "index.ts") { Remove-Item "index.ts" -Force }
@@ -131,7 +132,7 @@ function tssetup {
 [System.IO.File]::WriteAllText((Join-Path (Get-Location) "tsconfig.json"), $tsconfig, [System.Text.UTF8Encoding]::new($false))
     Write-Host "  ✅ tsconfig.json" -ForegroundColor Green
 
-$serverTs = 'import { watch } from "fs";
+$serverTs = 'import { watch, mkdirSync, existsSync } from "fs";
 const DEFAULT_PORT = 53000;
 
 async function findAvailablePort(startPort: number): Promise<number> {
@@ -153,6 +154,7 @@ const notifyReload = () => {
   console.log("🔄 File changed! Reloading browser...");
   for (const socket of sockets) { socket.send("reload"); }
 };
+if (!existsSync("./dist")) mkdirSync("./dist", { recursive: true });
 watch("./dist", { recursive: true }, notifyReload);
 watch("./index.html", notifyReload);
 

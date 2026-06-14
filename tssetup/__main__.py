@@ -491,7 +491,8 @@ def _do_pip_upgrade(pkg: str) -> bool:
 
 def _relaunch():
     exe = shutil.which("tssetup") or sys.argv[0]
-    os.execv(exe, [exe] + sys.argv[1:])
+    subprocess.run([exe] + sys.argv[1:])
+    sys.exit(0)
 
 
 def auto_update(remote: str, lang: str):

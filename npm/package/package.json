@@ -1,0 +1,28 @@
+{
+  "name": "@lapius/tssetup",
+  "version": "0.0.0",
+  "description": "Bun + TypeScript フロントエンド環境を1コマンドで構築する CLI（要 Python 3.9+）",
+  "keywords": [
+    "cli",
+    "bun",
+    "typescript",
+    "scaffold",
+    "setup"
+  ],
+  "homepage": "https://github.com/Lapius7/tssetup",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lapius7/tssetup.git"
+  },
+  "license": "MIT",
+  "bin": {
+    "tssetup": "bin/tssetup"
+  },
+  "files": [
+    "bin/tssetup",
+    "lib"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

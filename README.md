@@ -23,6 +23,12 @@ PowerShellやCMDから1コマンドで、Bun + TypeScript の高速なフロン�
 pip install tssetup
 ```
 
+npm からも入れられます（Python 3.9 以降が必要）:
+
+```bash
+npm i -g @lapius/tssetup
+```
+
 > [!NOTE]
 >
 > - PowerShell・CMD・Windows Terminal どれからでも使えます。
@@ -102,6 +108,8 @@ my-app/
 ```bash
 pip install --upgrade tssetup
 ```
+
+npm で入れた場合は `npm i -g @lapius/tssetup` で更新します（`tssetup --update` でも可）。
 
 ---
 

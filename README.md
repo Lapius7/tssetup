@@ -17,16 +17,18 @@ PowerShellやCMDから1コマンドで、Bun + TypeScript の高速なフロン�
 
 ## 🛠️ インストール方法
 
-**pip（推奨）:**
-
-```bash
-pip install tssetup
-```
-
-npm からも入れられます（Python 3.9 以降が必要）:
+**npm（推奨）:**
 
 ```bash
 npm i -g @lapius/tssetup
+```
+
+`tssetup` コマンドが使えるようになります（Node.js 18 以降が必要。本体はシステムの Python 3.9+ で動きます）。
+
+**pip:**
+
+```bash
+pip install tssetup
 ```
 
 > [!NOTE]
@@ -105,11 +107,19 @@ my-app/
 
 ## 🔄 アップデート
 
+npm で入れた場合:
+
+```bash
+npm i -g @lapius/tssetup
+```
+
+pip で入れた場合:
+
 ```bash
 pip install --upgrade tssetup
 ```
 
-npm で入れた場合は `npm i -g @lapius/tssetup` で更新します（`tssetup --update` でも可）。
+どちらの場合も `tssetup --update` で、入れた方法に合わせて更新できます。
 
 ---
 

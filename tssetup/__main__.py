@@ -540,6 +540,19 @@ def do_update(remote: Optional[str], lang: str):
 
 # ── Entry point ────────────────────────────────────────────────────
 
+def _lapius_footer(lang: str) -> str:
+    """--help / --version の最後に出す作者表示と lapacks の案内"""
+    import shutil
+    ja = lang == "ja"
+    s = "作者: Lapius (https://github.com/Lapius7)" if ja else "Author: Lapius (https://github.com/Lapius7)"
+    if shutil.which("lapacks"):
+        tip = "@lapius のツール: lapacks で一覧・インストール・更新" if ja else "More @lapius tools: run lapacks to list, install and update them"
+    else:
+        tip = ("@lapius のツール: npm i -g @lapius/lapacks で一覧・インストール・更新を管理" if ja
+               else "More @lapius tools: npm i -g @lapius/lapacks to list, install and update them")
+    return f"{s}\n{tip}"
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(prog="tssetup", add_help=False)
@@ -560,6 +573,7 @@ def main():
 
     if args.version:
         print(f"tssetup v{__version__}")
+        print(_lapius_footer(lang))
         return
 
     remote = fetch_remote_version()
@@ -577,6 +591,8 @@ def main():
 
     if args.help:
         show_help(lang)
+        print()
+        print(_lapius_footer(lang))
         return
 
     if args.interactive:

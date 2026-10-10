@@ -20,7 +20,7 @@ PowerShellやCMDから1コマンドで、Bun + TypeScript の高速なフロン�
 **npm（推奨）:**
 
 ```bash
-npm i -g @lapius/tssetup
+pnpm add -g @lapius/tssetup
 ```
 
 `tssetup` コマンドが使えるようになります（Node.js 18 以降が必要。本体はシステムの Python 3.9+ で動きます）。
@@ -110,7 +110,7 @@ my-app/
 npm で入れた場合:
 
 ```bash
-npm i -g @lapius/tssetup
+pnpm add -g @lapius/tssetup
 ```
 
 pip で入れた場合:

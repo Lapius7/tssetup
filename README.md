@@ -1,145 +1,136 @@
-# tssetup
+<div align="center">
 
-PowerShellやCMDから1コマンドで、Bun + TypeScript の高速なフロントエンド開発環境（ホットリロードサーバー内蔵）を初期構築するツールです。
+<p align="center">
+  <img src="docs/images/banner.png" alt="tssetup" width="100%">
+</p>
 
-## 🚀 特徴
+<p align="center"><b>English</b> | <a href="README.ja.md">日本語</a></p>
 
-- **瞬時にプロジェクト開始:** フォルダ作成、`bun init`、`tsconfig.json` の設定、ホットリロードサーバースクリプトの作成を自動で一括実行します。
-- **多彩な初期テンプレート:**
-  - `default`: Destyle.css を内包したシンプルな構成（ダークモード対応）。
-  - `tailwind`: CDN版 Tailwind CSS が即座に使えるレイアウト構成。
-  - `router`: ライブラリを使わずに HTML5 History API を利用した、自作の超軽量 SPA ルーティング構成。
-  - `empty`: 最少構成（空の TypeScript ファイルとシンプルな HTML）。
-- **エディタ連携:** `--code` オプションを付けるだけで、作成したプロジェクトフォルダを VS Code で即座に開きます。
-- **自動バージョン確認:** 実行時に最新バージョンを確認し、更新がある場合は通知します。
+<h1 align="center">tssetup</h1>
+
+<h3 align="center">Scaffold a Bun + TypeScript frontend project with one command.</h3>
+
+<p align="center">Creates a Bun + TypeScript project with a hot-reload dev server from PowerShell or CMD. Pair it with <a href="https://github.com/Lapius7/tsbuild">tsbuild</a> to run it.</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@lapius/tssetup"><img alt="npm" src="https://img.shields.io/npm/v/@lapius/tssetup?style=flat-square&color=cb3837&logo=npm"></a>
+  <a href="https://pypi.org/project/tssetup/"><img alt="PyPI" src="https://img.shields.io/pypi/v/tssetup?style=flat-square&color=3775a9&logo=pypi&logoColor=white"></a>
+  <a href="https://bun.sh"><img alt="Bun" src="https://img.shields.io/badge/runtime-Bun-fbf0df?logo=bun&logoColor=000000&style=flat-square&labelColor=000000"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/Lapius7/tssetup?style=flat-square&color=97ca00"></a>
+  <a href="https://github.com/Lapius7/tssetup/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/Lapius7/tssetup?style=flat-square&color=e3b341&logo=github"></a>
+  <a href="https://github.com/Lapius7/tssetup/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/Lapius7/tssetup?style=flat-square&color=3b82f6"></a>
+</p>
+
+<p align="center"><a href="#quick-start">Quick start</a> · <a href="#options">Options</a> · <a href="#templates">Templates</a> · <a href="#update">Update</a></p>
+
+</div>
 
 ---
 
-## 🛠️ インストール方法
+## Features
 
-**pnpm（推奨）:**
+- **Instant start**: creates the folder, runs `bun init`, sets up `tsconfig.json` and writes the hot-reload server script.
+- **Templates**: `default`, `tailwind`, `router`, `three`, `alpine`, `bootstrap` and `empty` (see [Templates](#templates)).
+- **Editor hand-off**: `--code` opens the new project in VS Code, `--open` in Explorer.
+- **Interactive mode**: `-i` asks for the settings step by step.
+- **Update check**: shows a notice when a newer version exists.
 
-> このパッケージは **pnpm 前提**です。npm と pnpm の両方に入れると同じコマンドが二重になるため、`pnpm add -g` だけを使ってください。
+## Quick start
 
-```bash
+You need **Python 3.9+** and **Bun**. VS Code is optional, for `--code`.
+
+```sh
 pnpm add -g @lapius/tssetup
-```
-
-`tssetup` コマンドが使えるようになります（Node.js 18 以降が必要。本体はシステムの Python 3.9+ で動きます）。
-
-**pip:**
-
-```bash
+# or
 pip install tssetup
 ```
 
 > [!NOTE]
->
-> - PowerShell・CMD・Windows Terminal どれからでも使えます。
-> - 動作には **Python 3.9+** と **Bun** が必要です。
+> The npm package is built for pnpm. Do not install it with both npm and pnpm, or the same command exists twice. The npm package is a launcher that runs the Python tool, so it also needs Node.js 18 or later.
 
----
-
-## ⚙️ 動作に必要な環境（依存関係）
-
-| ツール | 用途 | インストール |
-| :--- | :--- | :--- |
-| **Python 3.9+** | tssetup 本体の実行 | [python.org](https://www.python.org/) |
-| **Bun** | プロジェクト初期化・TSコンパイル | `powershell -c "irm bun.sh/install.ps1 \| iex"` |
-| **VS Code** (任意) | `--code` オプション使用時 | [code.visualstudio.com](https://code.visualstudio.com/) |
-
----
-
-## ⚡ 使い方と全パラメータ一覧
-
-```bash
-tssetup <プロジェクト名> [--mode <モード名>] [--title <タイトル名>] [--code]
+```sh
+tssetup my-app                        # default template
+tssetup my-app --mode tailwind --code # Tailwind CSS, then open VS Code
+tssetup my-app --mode router --title "My SPA"
+tssetup my-app --mode empty           # minimal
+tssetup .                             # scaffold in the current directory
+tssetup -i                            # interactive
 ```
 
-引数なしで実行するとバージョン情報・開発者情報のインフォ画面が表示されます。
+After it finishes, the shell moves into the new project. Run [`tsbuild`](https://github.com/Lapius7/tsbuild) there to start developing. Run `tssetup` with no arguments to see the version and info screen.
 
-### パラメータ（引数）詳細
+| Tool | Used for | Install |
+|---|---|---|
+| Python 3.9+ | Running tssetup | [python.org](https://www.python.org/) |
+| Bun | Project init and TypeScript compile | `powershell -c "irm bun.sh/install.ps1 \| iex"` |
+| VS Code (optional) | `--code` | [code.visualstudio.com](https://code.visualstudio.com/) |
 
-| パラメータ | 短縮形 | 型 | 必須 | デフォルト値 | 説明 |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `project_name` | - | string | **はい** | - | 作成するプロジェクトのフォルダ名 |
-| `--mode` | `-m` | string | いいえ | `default` | テンプレートモード（`default` / `tailwind` / `router` / `empty`） |
-| `--title` | `-t` | string | いいえ | `"Bun + TS App"` | `<title>` タグに埋め込むテキスト |
-| `--code` | `-c` | flag | いいえ | - | セットアップ完了後に VS Code で開く |
-| `--version` | `-v` | flag | いいえ | - | バージョンを表示 |
-| `--help` | `-h` | flag | いいえ | - | ヘルプを表示 |
+## Options
 
----
-
-### コマンド実行例
-
-```bash
-# 標準テンプレートで作成
-tssetup my-app
-
-# Tailwind CSS 組み込み + VS Code で開く
-tssetup my-app --mode tailwind --code
-
-# 自作 SPA ルーター構成
-tssetup my-app --mode router --title "マイSPAサイト"
-
-# 最小構成
-tssetup my-app --mode empty
+```sh
+tssetup <project-name> [--mode <mode>] [--title <text>] [--code]
 ```
 
----
+| Option | Short | Default | What it does |
+|---|---|---|---|
+| `project_name` | | required | Project folder name (`.` for the current directory) |
+| `--mode <mode>` | `-m` | `default` | Template mode |
+| `--title <text>` | `-t` | `Bun + TS App` | Text for the HTML `<title>` |
+| `--code` | `-c` | | Open in VS Code after setup |
+| `--open` | `-o` | | Open in Explorer after setup |
+| `--interactive` | `-i` | | Set the project up interactively |
+| `--list` | `-l` | | List available templates |
+| `--update` | `-u` | | Update to the latest version |
+| `--lang <lang>` | | | Display language: `ja` or `en` |
+| `--version` | `-v` | | Show the version |
+| `--help` | `-h` | | Show help |
 
-## 📁 作成されるファイル構成
+## Templates
+
+| Mode | What you get |
+|---|---|
+| `default` | Simple layout with Destyle.css and dark mode |
+| `tailwind` | Tailwind CSS (CDN) ready to use |
+| `router` | Small SPA router built on the HTML5 History API, no library |
+| `three` | Three.js (CDN) with a rotating cube |
+| `alpine` | Alpine.js (CDN) reactive UI demo |
+| `bootstrap` | Bootstrap 5 (CDN) with a dark theme and a counter |
+| `empty` | Empty TypeScript file and simple HTML |
+
+## What it creates
 
 ```
 my-app/
 ├── src/
-│   └── index.ts        ← エントリポイント（--mode で内容が変わる）
-├── dist/               ← tsc が自動生成するJS出力先
-├── node_modules/       ← bun install が自動生成
-├── index.html          ← フロントエンドのHTML
-├── server.ts           ← ホットリロード対応の開発用Webサーバー
-├── tsconfig.json       ← TypeScript コンパイラ設定
-└── package.json        ← Bun プロジェクト設定
+│   └── index.ts        ← entry point (content depends on --mode)
+├── dist/               ← JS output from tsc
+├── node_modules/       ← from bun install
+├── index.html          ← frontend HTML
+├── server.ts           ← dev server with hot reload
+├── tsconfig.json       ← TypeScript config
+└── package.json        ← Bun project config
 ```
 
-プロジェクト作成後は自動的にそのディレクトリへ移動します。そのまま `tsbuild` を実行すれば開発を始められます。
+## Update
 
----
-
-## 🔄 アップデート
-
-npm で入れた場合:
-
-```bash
-pnpm add -g @lapius/tssetup
+```sh
+tssetup --update
 ```
 
-pip で入れた場合:
+Or reinstall: `pnpm add -g @lapius/tssetup` / `pip install --upgrade tssetup`.
 
-```bash
-pip install --upgrade tssetup
-```
+## Safety
 
-どちらの場合も `tssetup --update` で、入れた方法に合わせて更新できます。
+> [!NOTE]
+> The README and PyPI metadata say Windows (PowerShell, CMD, Windows Terminal). Linux and macOS have not been verified for this README. The `three`, `alpine` and `bootstrap` templates were added after the old README and were checked against the code only, not generated and run here.
 
----
+The software is provided as is, and the author takes no responsibility for any damage from using it.
 
-## ✉️ 問い合わせ先
+## Contact
 
-- **X (旧Twitter):** [@Lapius7](https://x.com/Lapius7)
-- **GitHub Issues:** [Lapius7/tssetup/issues](https://github.com/Lapius7/tssetup/issues)
+- X: [@Lapius7](https://x.com/Lapius7)
+- [GitHub Issues](https://github.com/Lapius7/tssetup/issues)
 
----
+## License
 
-## ⚠️ 免責事項
-
-本ソフトウェアの使用によって生じた直接的・間接的な損害について、作者は一切の責任を負いません。自己責任のもとでご使用ください。
-
----
-
-## 📄 ライセンス & コピーライト
-
-本プロジェクトは [MIT License](https://opensource.org/licenses/MIT) のもとで公開されています。
-
-Copyright (c) 2026 Lapius7
+[MIT](LICENSE) © 2026 Lapius7
